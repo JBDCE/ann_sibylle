@@ -1,0 +1,7 @@
+- name: Install Mailcow
+  hosts: basementserver  # TODO: THis should be replaced with a better group in the future
+  gather_facts: true
+  roles:
+    - docker
+    - docker-compose
+    - mailcow-ansiblerole
