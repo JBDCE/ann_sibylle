@@ -33,7 +33,3 @@ Writing this now with a cool mind instead of having to figure things out when ac
 1. Obtain a new computer running ubuntu to be the target for the backup restoration
 2. ???
 3. Profit?
-
-### Random List of comand i use to run this so i dont forget while im working this out:
-Run the first_playbook.yml and pass the inventory:
-`ansible-playbook --check first_playbook.yml -i inventory.ini`
