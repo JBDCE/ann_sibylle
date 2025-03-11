@@ -1,0 +1,19 @@
+# Ansible playbook for recreating the basementserver machine
+# Aims to contain all settings for recreating the entire machine from scratch
+
+- name: Create Basementserver
+  hosts: basementserver
+  gather_facts: true
+  become: true
+  vars:
+    mailcow__docker_network_ipv4: '172.48.1'
+  roles:
+    - docker
+    - mailcow-ansiblerole
+    # - paperless install
+    # - jellyfin install
+    # - cron configuration
+    # - smbd setup for jellyfin and paperless ingesting
+
+    # - paperless backup restoration
+
