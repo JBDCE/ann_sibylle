@@ -1,3 +1,9 @@
-- name: Print message
-  ansible.builtin.debug:
-    msg: 'TODO: Actually add instructions for installing docker'
+- name: Install docker and docker-compose as dependencies for mailcow
+  become: true
+  apt:
+    pkg:
+      - docker
+      - docker-compose-v2
+    update_cache: yes
+    install_recommends: yes
+    state: present

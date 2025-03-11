@@ -1,7 +1,9 @@
 - name: Install Mailcow
   hosts: basementserver  # TODO: THis should be replaced with a better group in the future
   gather_facts: true
+  become: true
+  vars:
+    mailcow__docker_network_ipv4: '172.48.1'
   roles:
     - docker
-    - docker-compose
     - mailcow-ansiblerole
