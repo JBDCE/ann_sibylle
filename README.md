@@ -13,3 +13,10 @@ Writing this now with a cool mind instead of having to figure things out when ac
 1. Obtain a new computer running ubuntu to be the target for the backup restoration
 2. ???
 3. Profit?
+
+### Random List of comand i use to run this so i dont forget while im working this out:
+Run the first_playbook.yml and pass the inventory:
+`ansible-playbook --check first_playbook.yml -i inventory.ini`
+`ansible-galaxy role install mailcow.mailcow``
+While the PR: https://github.com/mailcow/mailcow-ansiblerole/pull/56 is still open this will not be possible to install from just the public galaxy. Instead use this version.
+`ansible-galaxy role install git+https://github.com/JBDCE/mailcow-ansiblerole.git,master,mailcow-ansiblerole`
