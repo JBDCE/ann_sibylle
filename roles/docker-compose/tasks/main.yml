@@ -1,3 +1,0 @@
-- name: Print message
-  ansible.builtin.debug:
-    msg: 'TODO: Actually add instructions for installing docker-compose'
