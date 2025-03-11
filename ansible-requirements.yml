@@ -1,0 +1,7 @@
+# TODO This should be replaced with the official galaxy
+# resource once pr: https://github.com/mailcow/mailcow-ansiblerole/pull/56
+# has been merged. Until then this points to my own fork
+- name: mailcow-ansiblerole
+  src: https://github.com/JBDCE/mailcow-ansiblerole.git
+  version: master
+  scm: git
