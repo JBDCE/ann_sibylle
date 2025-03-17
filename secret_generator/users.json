@@ -1,0 +1,17 @@
+[
+    {
+        "identifier": "ubuntu-user-jbdce",
+        "username": "jbdce",
+        "description": "User account for operating system"
+    },
+    {
+        "identifier": "ubuntu-user-root",
+        "username": "root",
+        "description": "Root user account"
+    },
+    {
+        "identifier": "paperless-admin",
+        "username": "admin",
+        "description": "Administrator account for configuring paperless"
+    }
+]
