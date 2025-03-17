@@ -1,6 +1,9 @@
 from random import randint
 from json import load
 from sys import argv
+from subprocess import run
+
+import argparse
 
 # This excludes a bunch of chars that might
 # lead to problems down the line so omitting them
@@ -27,8 +30,9 @@ def generate_passwords(users):
         user['password'] = _generate_password(valid_chars)
     return
 
-def generate_vaultfile(users):
+def generate_vaultfile(users, secret_file):
     # TODO Create an ansible vaultfile for the users and identifiers
+
     return
 
 def main(infilepath):
@@ -44,6 +48,24 @@ def main(infilepath):
     return
 
 if __name__ == "__main__":
-    infile=argv[1]
-    print(infile)
-    main(infilepath=infile)
+    parser = argparse.ArgumentParser(description="Secret generator for rolling out new systems.")
+    parser.add_argument(
+        '-i',
+        '--infile',
+        help="Input users.json file",
+        required=True
+    )
+    parser.add_argument(
+        '-s',
+        '--systemname',
+        help=(
+            "Target systemname. An ansible vault with this systemname will be created."
+            "If this is omited no ansible vault will be created"
+            "and the input object will be output to stdout"
+        ),
+        required=False
+    )
+    args = vars(parser.parse_args())
+    print(args['infile'])
+    main(infilepath=args['infile'])
+    
