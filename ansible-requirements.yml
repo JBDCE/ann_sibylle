@@ -5,3 +5,7 @@
   src: https://github.com/JBDCE/mailcow-ansiblerole.git
   version: master
   scm: git
+
+# TBH: No idea what fancy magic this role actually does. But for now I trust it so im keeping this here
+- name: geerlingguy.docker
+  version: master

@@ -2,13 +2,13 @@
 # Aims to contain all settings for recreating the entire machine from scratch
 
 - name: Create Basementserver
-  hosts: basementserver
+  hosts: all
   gather_facts: true
   become: true
   vars:
     mailcow__docker_network_ipv4: '172.48.1'
   roles:
-    - docker
+    - geerlingguy.docker
     - mailcow-ansiblerole
     # - paperless install
     # - jellyfin install
