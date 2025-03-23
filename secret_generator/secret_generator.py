@@ -1,7 +1,14 @@
 from random import randint
 from json import load, dumps
-from yaml import dump as yamldump
 from subprocess import run
+from os.path import isfile
+
+# Assigning aliases here to make it easier
+# to see the difference between yaml and json handling in code
+from yaml import safe_dump as yamldump
+from yaml import safe_load as yamlload
+# TODO: Perhaps just importing yaml and 
+# then calling yaml.load() would be cleaner?
 
 import argparse
 
@@ -30,20 +37,46 @@ def generate_passwords(users):
         user['password'] = _generate_password(valid_chars)
     return
 
-def generate_vaultfile(users, secret_filename, encrypt):
-
-    valutfile_pattern = {}
+def generate_vaultfile(users):
+    # Convert the users dict into the format required for use in ansible
+    vaultfile_pattern = {}
     for user in users:
-        valutfile_pattern[user['identifier']+"_username"] = user['username']
-        valutfile_pattern[user['identifier']+"_password"] = user['password']
+        vaultfile_pattern[user['identifier']+"_username"] = user['username']
+        vaultfile_pattern[user['identifier']+"_password"] = user['password']
 
-    #Create an ansible vaultfile for the users and identifiers
-    with open(secret_filename, '+w') as outfile:
-        outfile.write(yamldump(valutfile_pattern))
+    return vaultfile_pattern
+
+def write_vaultfile(vaultfile_pattern, secret_filename, encrypt):
+    # Hander for vaultfile operations.
+    # Makes sure only new keys are added to existing files
+    # and handles ansible-vault encryption
+
+    updated_vaultfile = {}
+    if isfile(secret_filename):
+        # Decrypt input file. If we are unable to decrypt the file
+        # we bail as we would otherwise delete previously created secrets
+        if encrypt:
+            result = run(["ansible-vault", "decrypt", secret_filename])
+            assert result.returncode == 0, "Decrypting vault failed"
+
+        # Load the existing vaultfile
+        with open(secret_filename, 'r') as outfile:
+            updated_vaultfile = yamlload(outfile)
+
+    for key, value in vaultfile_pattern.items():
+        # If the username or password was already set dont alter it
+        if key in updated_vaultfile:
+            continue
+        updated_vaultfile[key] = value
+
+    with open(secret_filename, 'w') as outfile:
+        outfile.write(yamldump(updated_vaultfile))
 
     # Encrypt the vaultfile
     if encrypt:
-        run(["ansible-vault", "encrypt", secret_filename])
+        result = run(["ansible-vault", "encrypt", secret_filename])
+        assert result.returncode == 0, "Encrypting vault failed"
+
     return
 
 def main(infilepath, systemname, encrypt):
@@ -58,11 +91,15 @@ def main(infilepath, systemname, encrypt):
         print(dumps(user_dict, indent=2))
         return
 
-    generate_vaultfile(
+    vaultfile_pattern = generate_vaultfile(
         users=user_dict,
+    )
+    write_vaultfile(
+        vaultfile_pattern=vaultfile_pattern,
         secret_filename=systemname+'.secret',
         encrypt=encrypt,
     )
+
     return
 
 if __name__ == "__main__":
@@ -86,18 +123,19 @@ if __name__ == "__main__":
         required=False,
     )
     parser.add_argument(
-        '-e',
-        '--encrypt',
+        '--dont-encrypt',
+        dest='dont_encrypt',
         help=(
             "Allows you to disable the fault file encryption"
             "Mainly for debugging"
         ),
-        default=True,
+        default=False,
+        action='store_true',
     )
 
     args = vars(parser.parse_args())
     main(
         infilepath=args['infile'],
         systemname=args['systemname'],
-        encrypt=args['encrypt'],
+        encrypt=not args['dont_encrypt'],
     )
