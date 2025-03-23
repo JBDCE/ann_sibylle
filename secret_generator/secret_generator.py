@@ -1,6 +1,6 @@
 from random import randint
-from json import load
-from sys import argv
+from json import load, dumps
+from yaml import dump as yamldump
 from subprocess import run
 
 import argparse
@@ -30,12 +30,23 @@ def generate_passwords(users):
         user['password'] = _generate_password(valid_chars)
     return
 
-def generate_vaultfile(users, secret_file):
-    # TODO Create an ansible vaultfile for the users and identifiers
+def generate_vaultfile(users, secret_filename, encrypt):
 
+    valutfile_pattern = {}
+    for user in users:
+        valutfile_pattern[user['identifier']+"_username"] = user['username']
+        valutfile_pattern[user['identifier']+"_password"] = user['password']
+
+    #Create an ansible vaultfile for the users and identifiers
+    with open(secret_filename, '+w') as outfile:
+        outfile.write(yamldump(valutfile_pattern))
+
+    # Encrypt the vaultfile
+    if encrypt:
+        run(["ansible-vault", "encrypt", secret_filename])
     return
 
-def main(infilepath):
+def main(infilepath, systemname, encrypt):
     # Load json file containing a list of dictionaries
     # with the keys identifier and username from command line
     with open(infilepath, "r") as users:
@@ -43,17 +54,26 @@ def main(infilepath):
 
     # The users dict is modified in place
     generate_passwords(users=user_dict)
+    if not systemname:
+        print(dumps(user_dict, indent=2))
+        return
 
-    generate_vaultfile(users=user_dict)
+    generate_vaultfile(
+        users=user_dict,
+        secret_filename=systemname+'.secret',
+        encrypt=encrypt,
+    )
     return
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Secret generator for rolling out new systems.")
+    parser = argparse.ArgumentParser(
+        description="Secret generator for rolling out new systems."
+    )
     parser.add_argument(
         '-i',
         '--infile',
         help="Input users.json file",
-        required=True
+        required=True,
     )
     parser.add_argument(
         '-s',
@@ -63,9 +83,21 @@ if __name__ == "__main__":
             "If this is omited no ansible vault will be created"
             "and the input object will be output to stdout"
         ),
-        required=False
+        required=False,
     )
+    parser.add_argument(
+        '-e',
+        '--encrypt',
+        help=(
+            "Allows you to disable the fault file encryption"
+            "Mainly for debugging"
+        ),
+        default=True,
+    )
+
     args = vars(parser.parse_args())
-    print(args['infile'])
-    main(infilepath=args['infile'])
-    
+    main(
+        infilepath=args['infile'],
+        systemname=args['systemname'],
+        encrypt=args['encrypt'],
+    )

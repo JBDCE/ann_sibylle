@@ -1,2 +1,3 @@
 venv/*
 roles/mailcow-ansiblerole
+*.secret
